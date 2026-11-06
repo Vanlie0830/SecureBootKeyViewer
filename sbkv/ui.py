@@ -9,6 +9,7 @@ v00.00.1b: 新增主題切換(暗/亮/系統)、語言切換(中/英)、設定�
 """
 
 import queue
+import textwrap
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -456,7 +457,14 @@ class App(tk.Tk):
             lines.append(self._t("cert_info"))
             lines.append("")
             for k, v in cert.items():
-                lines.append(f"  {k:16s} {v}")
+                # 長值自動換行並對齊 (v00.00.1c fix)
+                prefix = f"  {k:16s} "
+                wrapped = textwrap.fill(
+                    str(v), width=72,
+                    initial_indent=prefix,
+                    subsequent_indent=" " * len(prefix),
+                )
+                lines.append(wrapped)
         elif entry["type_name"] in HASH_TYPES:
             lines.append(self._t("hash_value"))
             lines.append("")

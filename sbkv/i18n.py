@@ -10,9 +10,9 @@ LANGS = {
 
 STRINGS = {
     # ---- 導覽 ----
-    "nav_overview": {"zh-TW": "📋 總覽", "en": "📋 Overview"},
-    "nav_log": {"zh-TW": "📜 日誌", "en": "📜 Log"},
-    "nav_settings": {"zh-TW": "⚙️ 設定", "en": "⚙️ Settings"},
+    "nav_overview": {"zh-TW": "總覽", "en": "Overview"},
+    "nav_log": {"zh-TW": "日誌", "en": "Log"},
+    "nav_settings": {"zh-TW": "設定", "en": "Settings"},
 
     # ---- 工具列 ----
     "btn_refresh": {"zh-TW": "🔄 重新讀取", "en": "🔄 Refresh"},
