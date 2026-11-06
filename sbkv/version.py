@@ -8,7 +8,7 @@
 
 import re
 
-VERSION = "v00.00.1a"
+VERSION = "v00.00.1b"
 
 _VER_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)([a-z])$")
 
