@@ -111,10 +111,20 @@ class App(tk.Tk):
               foreground=[("selected", C["tree_selected_fg"])])
 
         # 捲軸
+        # 捲軸：深色、無箭頭、細條 (v00.00.1e)
         s.configure("Vertical.TScrollbar",
                      background=C["bg3"],
                      troughcolor=C["bg2"],
-                     borderwidth=0, relief="flat", width=8)
+                     borderwidth=0, relief="flat", width=8,
+                     arrowsize=0)
+        s.map("Vertical.TScrollbar",
+              background=[("active", C["border"])],
+              arrowcolor=[("!disabled", C["bg2"])])
+        s.configure("TScrollbar",
+                     background=C["bg3"],
+                     troughcolor=C["bg2"],
+                     borderwidth=0, relief="flat", width=8,
+                     arrowsize=0)
         s.configure("Horizontal.TScrollbar",
                      background=C["scrollbar_bg"],
                      troughcolor=C["scrollbar_trough"],
@@ -163,9 +173,7 @@ class App(tk.Tk):
         # 底部: 設定 + 版號
         self._make_nav_button(sidebar, "settings", "\u2699\ufe0f",
                               self._t("nav_settings"), bottom=True)
-        tk.Label(sidebar, text=f"  {VERSION}", bg=C["bg2"],
-                 fg=C["muted"], font=FONT_SANS_SM, anchor="w"
-                 ).pack(side="bottom", fill="x", pady=8)
+        # 版號已移至設定頁面 (v00.00.1e)
 
         # 主內容
         main = tk.Frame(self, bg=C["bg"])
@@ -429,7 +437,8 @@ class App(tk.Tk):
         detail_text.pack(fill="both", expand=True)
 
         # lmargin2 懸掛縮排：長值換行後自動對齊值欄位 (v00.00.1d)
-        indent_px = tkfont.Font(font=FONT_MONO).measure("  Subject        ")
+        # 精確測量 19 字元前綴寬度 (2空白 + 16欄位 + 1空白)
+        indent_px = tkfont.Font(font=FONT_MONO).measure(f"  {chr(0):16s} ")
         detail_text.tag_configure("kv", lmargin1=0, lmargin2=indent_px)
 
         detail_text.insert("1.0", self._t("select_item"))
@@ -580,7 +589,12 @@ class App(tk.Tk):
         copyright_text = self._t("copyright_text")
         tk.Label(copyright_card, text=copyright_text,
                  bg=C["card"], fg=C["muted"], font=FONT_SANS_SM, anchor="w",
-                 justify="left").pack(fill="x", padx=16, pady=(0, 16))
+                 justify="left").pack(fill="x", padx=16, pady=(0, 4))
+
+        # 版號顯示 (v00.00.1e)
+        tk.Label(copyright_card, text=f"Version {VERSION}",
+                 bg=C["card"], fg=C["accent"], font=FONT_MONO_SM, anchor="w"
+                 ).pack(fill="x", padx=16, pady=(0, 16))
 
     def _set_theme(self, mode):
         """切換 UI 主題並重建介面。"""
