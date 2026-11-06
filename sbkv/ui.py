@@ -9,9 +9,9 @@ v00.00.1b: 新增主題切換(暗/亮/系統)、語言切換(中/英)、設定�
 """
 
 import queue
-import textwrap
 import threading
 import tkinter as tk
+import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, ttk
 
 from . import collectors, parsers, report
@@ -26,8 +26,9 @@ APP_TITLE = "Secure Boot Key Viewer"
 
 FONT_SANS = ("Segoe UI", 10)
 FONT_SANS_SM = ("Segoe UI", 9)
-FONT_MONO = ("Cascadia Code", 10)
-FONT_MONO_SM = ("Cascadia Code", 9)
+FONT_MONO = ("Cascadia Code", 12)
+FONT_MONO_SM = ("Cascadia Code", 10)
+FONT_MONO_XS = ("Cascadia Code", 9)
 FONT_H1 = ("Segoe UI", 14, "bold")
 FONT_H2 = ("Segoe UI", 12, "bold")
 FONT_METRIC = ("Cascadia Code", 18, "bold")
@@ -111,9 +112,9 @@ class App(tk.Tk):
 
         # 捲軸
         s.configure("Vertical.TScrollbar",
-                     background=C["scrollbar_bg"],
-                     troughcolor=C["scrollbar_trough"],
-                     borderwidth=0, relief="flat")
+                     background=C["bg3"],
+                     troughcolor=C["bg2"],
+                     borderwidth=0, relief="flat", width=8)
         s.configure("Horizontal.TScrollbar",
                      background=C["scrollbar_bg"],
                      troughcolor=C["scrollbar_trough"],
@@ -390,8 +391,8 @@ class App(tk.Tk):
                      ).pack(fill="x", pady=24)
             return
 
-        paned = tk.PanedWindow(frame, orient="horizontal", bg=C["bg"],
-                               sashwidth=4, sashrelief="flat")
+        paned = tk.PanedWindow(frame, orient="horizontal", bg=C["border"],
+                               sashwidth=2, sashrelief="flat")
         paned.pack(fill="both", expand=True)
 
         left = tk.Frame(paned, bg=C["tree_bg"])
@@ -426,6 +427,11 @@ class App(tk.Tk):
                               insertbackground=C["text"],
                               selectbackground=C["accent"])
         detail_text.pack(fill="both", expand=True)
+
+        # lmargin2 懸掛縮排：長值換行後自動對齊值欄位 (v00.00.1d)
+        indent_px = tkfont.Font(font=FONT_MONO).measure("  Subject        ")
+        detail_text.tag_configure("kv", lmargin1=0, lmargin2=indent_px)
+
         detail_text.insert("1.0", self._t("select_item"))
         detail_text.configure(state="disabled")
 
@@ -444,37 +450,27 @@ class App(tk.Tk):
         text_widget.configure(state="normal")
         text_widget.delete("1.0", "end")
 
-        lines = [
-            f"{self._t('sig_type')}:  {entry['type_name']}",
-            f"{self._t('type_guid')}: {entry['type_guid']}",
-            f"{self._t('owner')}:     {entry['owner_guid']}",
-            f"{self._t('data_size')}:  {entry['data_size']} bytes",
-            "",
-        ]
+        text_widget.insert("end",
+            f"{self._t('sig_type')}:  {entry['type_name']}\n"
+            f"{self._t('type_guid')}: {entry['type_guid']}\n"
+            f"{self._t('owner')}:     {entry['owner_guid']}\n"
+            f"{self._t('data_size')}:  {entry['data_size']} bytes\n\n")
 
         if "X.509" in entry["type_name"]:
             cert = parse_certificate(entry["data"])
-            lines.append(self._t("cert_info"))
-            lines.append("")
+            text_widget.insert("end", self._t("cert_info") + "\n\n")
             for k, v in cert.items():
-                # 長值自動換行並對齊 (v00.00.1c fix)
-                prefix = f"  {k:16s} "
-                wrapped = textwrap.fill(
-                    str(v), width=72,
-                    initial_indent=prefix,
-                    subsequent_indent=" " * len(prefix),
-                )
-                lines.append(wrapped)
+                # kv tag 懸掛縮排：長值換行自動對齊值欄位
+                text_widget.insert("end",
+                    f"  {k:16s} {v}\n", "kv")
         elif entry["type_name"] in HASH_TYPES:
-            lines.append(self._t("hash_value"))
-            lines.append("")
-            lines.append(f"  {entry['data'].hex().upper()}")
+            text_widget.insert("end", self._t("hash_value") + "\n\n")
+            text_widget.insert("end",
+                f"  {entry['data'].hex().upper()}\n", "kv")
         else:
-            lines.append(self._t("raw_data"))
-            lines.append("")
-            lines.append(parsers.hex_dump(entry["data"]))
+            text_widget.insert("end", self._t("raw_data") + "\n\n")
+            text_widget.insert("end", parsers.hex_dump(entry["data"]))
 
-        text_widget.insert("1.0", "\n".join(lines))
         text_widget.configure(state="disabled")
 
     # ---- 日誌頁 ----
